@@ -47,8 +47,9 @@ func parseLine(line string) (int, []Cubes) {
 	return gameNum, results
 }
 
-func partOne(limits Cubes, lines []string) int {
+func PartOne(lines []string) int {
 	result := 0
+	limits := Cubes{"red": 12, "green": 13, "blue": 14}
 
 	var checkIfPossible = func(game []Cubes) bool {
 		for _, set := range game {
@@ -63,8 +64,7 @@ func partOne(limits Cubes, lines []string) int {
 
 	for _, l := range lines {
 		gameNum, sets := parseLine(l)
-		isPossible := checkIfPossible(sets)
-		if isPossible {
+		if checkIfPossible(sets) {
 			result += gameNum
 			continue
 		}
@@ -73,8 +73,34 @@ func partOne(limits Cubes, lines []string) int {
 	return result
 }
 
+func PartTwo(lines []string) int {
+	result := 0
+
+	var findMin = func(game []Cubes) Cubes {
+		minVals := Cubes{}
+		for _, set := range game {
+			for cube, used := range set {
+				if minVals[cube] < used {
+					minVals[cube] = used
+				}
+			}
+		}
+		return minVals
+	}
+
+	for _, l := range lines {
+		gameNum, sets := parseLine(l)
+		mins := findMin(sets)
+		pow := mins["red"] * mins["green"] * mins["blue"]
+		fmt.Printf("%d %v => %d\n", gameNum, mins, pow)
+		result += pow
+	}
+
+	return result
+}
+
 func main() {
 	lines := readLines()
-	limits := Cubes{"red": 12, "green": 13, "blue": 14}
-	fmt.Println(partOne(limits, lines))
+	fmt.Println(PartOne(lines))
+	fmt.Println(PartTwo(lines))
 }
