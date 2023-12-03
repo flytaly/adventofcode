@@ -57,7 +57,6 @@ func PartOne(lines []string) int {
 			}
 		}
 		return sum
-
 	}
 
 	var total int = 0
@@ -77,7 +76,54 @@ func PartOne(lines []string) int {
 	return total
 }
 
+func mul(nums []int) int {
+	res := 1
+	for _, n := range nums {
+		res *= n
+	}
+	return res
+}
+
+func PartTwo(lines []string) int {
+	numbers := [][]coord{}
+	for _, line := range lines {
+		numbers = append(numbers, extractNumbers(line))
+	}
+	var getAdjacent = func(lineIdx, colIdx1, colIdx2 int) []int {
+		res := []int{}
+		if (lineIdx < 0) || (lineIdx >= len(numbers)) {
+			return res
+		}
+		for _, number := range numbers[lineIdx] {
+			if (number.start <= colIdx2) && (number.end >= colIdx1) {
+				res = append(res, number.n)
+			}
+		}
+		return res
+	}
+
+	var total int = 0
+	for i, line := range lines {
+		for j := 0; j < len(line); j++ {
+			char := line[j]
+			if char != '*' {
+				continue
+			}
+			adj := []int{}
+			adj = append(adj, getAdjacent(i-1, j-1, j+1)...)
+			adj = append(adj, getAdjacent(i, j-1, j+1)...)
+			adj = append(adj, getAdjacent(i+1, j-1, j+1)...)
+			if len(adj) > 1 {
+				total += mul(adj)
+			}
+		}
+	}
+
+	return total
+}
+
 func main() {
 	lines := readLines()
 	fmt.Println(PartOne(lines))
+	fmt.Println(PartTwo(lines))
 }
