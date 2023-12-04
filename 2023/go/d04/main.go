@@ -54,7 +54,26 @@ func PartOne(lines []string) int {
 	return total
 }
 
+func PartTwo(lines []string) int {
+	total := 0
+
+	copies := make([]int, len(lines))
+	for idx, line := range lines {
+		win, have := parseInput(line)
+		matches := intersection(win, have)
+		instances := copies[idx] + 1
+		// fmt.Printf("Card %d -> %d instances\n", idx+1, instances)
+		for i := idx + 1; i <= idx+matches; i++ {
+			copies[i] += instances
+		}
+		total += instances
+	}
+
+	return total
+}
+
 func main() {
 	lines := readLines()
 	fmt.Println(PartOne(lines))
+	fmt.Println(PartTwo(lines))
 }
