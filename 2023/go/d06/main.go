@@ -54,7 +54,30 @@ func PartOne(lines []string) int {
 	return total
 }
 
+func parseInputPart2(lines []string) (pair [2]int) {
+	var re = regexp.MustCompile(`\d+`)
+	times := re.FindAllString(lines[0], -1)
+	dist := re.FindAllString(lines[1], -1)
+	pair[0], _ = strconv.Atoi(strings.Join(times, ""))
+	pair[1], _ = strconv.Atoi(strings.Join(dist, ""))
+	return pair
+}
+
+func PartTwo(lines []string) int {
+	parsed := parseInputPart2(lines)
+	time, record := parsed[0], parsed[1]
+	count := 0
+	for i := 1; i < time; i++ {
+		dist := (time - i) * i
+		if record < dist {
+			count++
+		}
+	}
+	return count
+}
+
 func main() {
 	lines := readLines()
 	fmt.Println(PartOne(lines))
+	fmt.Println(PartTwo(lines))
 }
