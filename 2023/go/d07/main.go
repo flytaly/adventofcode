@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/flytaly/adventofcode/2023/go/d07/p1"
+	"github.com/flytaly/adventofcode/2023/go/d07/p2"
 )
 
 const inputFile = "input.txt"
@@ -37,10 +38,6 @@ func parseInput(lines []string) (pairs [][]string) {
 func PartOne(lines []string) int {
 	parsed := parseInput(lines)
 
-	// for _, v := range parsed {
-	// 	fmt.Printf("%v -> %v\n", v[0], handStrenght(v[0]))
-	// }
-
 	sort.Slice(parsed, func(i, j int) bool {
 		return !p1.IsStronger(parsed[i][0], parsed[j][0])
 	})
@@ -55,7 +52,29 @@ func PartOne(lines []string) int {
 	return count
 }
 
+func PartTwo(lines []string) int {
+	parsed := parseInput(lines)
+
+	// for _, v := range parsed {
+	// 	fmt.Printf("%v -> %v\n", v[0], p2.HandStrenght(v[0]))
+	// }
+
+	sort.Slice(parsed, func(i, j int) bool {
+		return !p2.IsStronger(parsed[i][0], parsed[j][0])
+	})
+
+	count := 0
+
+	for index, data := range parsed {
+		bid, _ := strconv.Atoi(data[1])
+		count = count + (index+1)*bid
+	}
+
+	return count
+}
+
 func main() {
 	lines := readLines()
-	fmt.Println(PartOne(lines))
+	// fmt.Println(PartOne(lines))
+	fmt.Println(PartTwo(lines))
 }
