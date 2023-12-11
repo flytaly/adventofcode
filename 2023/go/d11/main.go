@@ -81,7 +81,7 @@ func getGalaxies(space []string) []galaxy {
 	return res
 }
 
-func getDist(space []string) int {
+func getDist(space []string, expandCoef int) int {
 	p := 0
 
 	rows, cols := getEmpties(space)
@@ -90,12 +90,12 @@ func getDist(space []string) int {
 		pad := 0
 		for _, row := range rows {
 			if row < max(g1.r, g2.r) && row > min(g1.r, g2.r) {
-				pad += 1
+				pad += expandCoef - 1
 			}
 		}
 		for _, col := range cols {
 			if col < max(g1.c, g2.c) && col > min(g1.c, g2.c) {
-				pad += 1
+				pad += expandCoef - 1
 			}
 		}
 		return abs(g1.r-g2.r) + abs(g1.c-g2.c) + pad
@@ -113,7 +113,11 @@ func getDist(space []string) int {
 }
 
 func PartOne(lines []string) {
-	fmt.Println("Part 1:", getDist(lines))
+	fmt.Println("Part 1:", getDist(lines, 2))
+}
+
+func PartTwo(lines []string) {
+	fmt.Println("Part 2:", getDist(lines, 1000000))
 }
 
 func main() {
@@ -123,4 +127,5 @@ func main() {
 	}
 	lines := readLines(inputFile)
 	PartOne(lines)
+	PartTwo(lines)
 }
