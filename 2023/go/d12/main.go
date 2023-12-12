@@ -44,12 +44,19 @@ func BtoI(b bool) int {
 	return 0
 }
 
+var memo = map[string]int{}
+
 func count(row string, nums []int) (res int) {
 	if len(row) == 0 {
 		return BtoI(len(nums) == 0)
 	}
 	if len(nums) == 0 {
 		return BtoI(!strings.Contains(row, "#"))
+	}
+
+	id := fmt.Sprintf("%v%v", row, nums)
+	if v, has := memo[id]; has {
+		return v
 	}
 
 	if row[0] == '.' || row[0] == '?' {
@@ -70,6 +77,7 @@ func count(row string, nums []int) (res int) {
 		res += count(row[n+1:], nums[1:])
 	}
 
+	memo[id] = res
 	return res
 }
 
@@ -84,6 +92,30 @@ func PartOne(lines []string) {
 	fmt.Println("Part 1:", total)
 }
 
+func unfoldRow(row string, n int) (res string) {
+	return strings.TrimSuffix(strings.Repeat(row+"?", n), "?")
+}
+
+func unfoldNums(nums []int, n int) (res []int) {
+	for i := 0; i < n; i++ {
+		res = append(res, nums...)
+	}
+	return res
+}
+
+func PartTwo(lines []string) {
+	rows, numRows := parse(lines)
+
+	total := 0
+	for i := 0; i < len(rows); i++ {
+		r := unfoldRow(rows[i], 5)
+		nn := unfoldNums(numRows[i], 5)
+		total += count(r, nn)
+	}
+
+	fmt.Println("Part 2:", total)
+}
+
 func main() {
 	var inputFile = "input.txt"
 	if len(os.Args) > 1 {
@@ -91,4 +123,5 @@ func main() {
 	}
 	lines := readLines(inputFile)
 	PartOne(lines)
+	PartTwo(lines)
 }
