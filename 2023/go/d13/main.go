@@ -76,6 +76,59 @@ func PartOne(lines []string) {
 	fmt.Println("Part 1:", total)
 }
 
+func count2(pattern []string, prevline int) int {
+	for point := 1; point < len(pattern); point++ {
+		if isSymmetrical(pattern, point) && point != prevline {
+			return point
+		}
+	}
+	return 0
+}
+
+func fixAndCount(pattern []string) int {
+	swap := func(v rune) string {
+		if v == '.' {
+			return "#"
+		}
+		return "."
+	}
+	prevMirr := count(pattern)
+	for i, l := range pattern {
+		for j, v := range l {
+			pattern[i] = l[:j] + swap(v) + l[j+1:]
+			newMirr := count2(pattern, prevMirr)
+			pattern[i] = l
+			if newMirr != 0 && newMirr != prevMirr {
+				return newMirr
+			}
+		}
+	}
+
+	return 0
+}
+
+func PartTwo(lines []string) {
+	pattern := []string{}
+	total := 0
+
+	for i, l := range lines {
+		if l != "" {
+			pattern = append(pattern, l)
+			if i < len(lines)-1 {
+				continue
+			}
+		}
+		v := fixAndCount(pattern) * 100
+		if v == 0 {
+			v = fixAndCount(transpose(pattern))
+		}
+		total += v
+		pattern = []string{}
+	}
+
+	fmt.Println("Part 2:", total)
+}
+
 func main() {
 	var inputFile = "input.txt"
 	if len(os.Args) > 1 {
@@ -83,4 +136,5 @@ func main() {
 	}
 	lines := readLines(inputFile)
 	PartOne(lines)
+	PartTwo(lines)
 }
