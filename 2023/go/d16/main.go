@@ -105,19 +105,18 @@ func (b *Beam) mirror(sp byte) {
 	}
 }
 
-func filterBeams(beams []*Beam, removeQueue []*Beam) []*Beam {
+func filterBeams(beams *[]*Beam, removeQueue []*Beam) {
 	for _, b := range removeQueue {
-		for i, b2 := range beams {
+		for i, b2 := range *beams {
 			if b == b2 {
-				beams = append(beams[:i], beams[i+1:]...)
+				*beams = append((*beams)[:i], (*beams)[i+1:]...)
 				break
 			}
 		}
 	}
-	return beams
 }
 
-func PartOne(grid []string) {
+func countEnergy(grid []string, beams []*Beam) int {
 	energy := make([][][]Dir, len(grid))
 	for i, v := range grid {
 		energy[i] = make([][]Dir, len(v))
@@ -132,8 +131,6 @@ func PartOne(grid []string) {
 		}
 		return false
 	}
-
-	beams := []*Beam{{0, -1, R}}
 
 	w, h := len(grid[0]), len(grid)
 	for i := 0; len(beams) != 0; i++ {
@@ -164,7 +161,7 @@ func PartOne(grid []string) {
 			}
 		}
 
-		beams = filterBeams(beams, deleteQueue)
+		filterBeams(&beams, deleteQueue)
 
 		// fmt.Printf("-> %d %s\n", i, beams)
 	}
@@ -174,15 +171,34 @@ func PartOne(grid []string) {
 		for _, r := range c {
 			if len(r) > 0 {
 				count++
-				fmt.Print("#")
-				continue
 			}
-			fmt.Print(".")
 		}
-		fmt.Println()
 	}
 
-	fmt.Println("Part 1:", count)
+	return count
+
+}
+
+func PartOne(grid []string) {
+	beams := []*Beam{{0, -1, R}}
+
+	fmt.Println("Part 1:", countEnergy(grid, beams))
+}
+
+func PartTwo(grid []string) {
+	res := 0
+
+	for i := 0; i < len(grid); i++ {
+		res = max(res, countEnergy(grid, []*Beam{{i, -1, R}}))
+		res = max(res, countEnergy(grid, []*Beam{{i, len(grid), L}}))
+	}
+
+	for j := 0; j < len(grid[0]); j++ {
+		res = max(res, countEnergy(grid, []*Beam{{-1, j, D}}))
+		res = max(res, countEnergy(grid, []*Beam{{len(grid[0]), j, U}}))
+	}
+
+	fmt.Println("Part 2:", res)
 }
 
 func main() {
@@ -192,4 +208,5 @@ func main() {
 	}
 	lines := readLines(inputFile)
 	PartOne(lines)
+	PartTwo(lines)
 }
