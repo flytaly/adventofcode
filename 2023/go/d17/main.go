@@ -1,6 +1,7 @@
 package main
 
 import (
+	"container/heap"
 	"fmt"
 	"os"
 	"path"
@@ -19,6 +20,32 @@ func readLines(inputFile string) []string {
 	}
 	input := strings.Trim(string(f), "\n")
 	return strings.Split(input, "\n")
+}
+
+// A PriorityQueue implements heap.Interface and holds Items.
+type PriorityQueue []*Block
+
+func (pq PriorityQueue) Len() int { return len(pq) }
+
+func (pq PriorityQueue) Less(i, j int) bool {
+	return pq[i].cost < pq[j].cost
+}
+
+func (pq PriorityQueue) Swap(i, j int) {
+	pq[i], pq[j] = pq[j], pq[i]
+}
+
+func (pq *PriorityQueue) Push(x any) {
+	*pq = append(*pq, x.(*Block))
+}
+
+func (pq *PriorityQueue) Pop() any {
+	old := *pq
+	n := len(old)
+	item := old[n-1]
+	old[n-1] = nil // avoid memory leak
+	*pq = old[0 : n-1]
+	return item
 }
 
 func parse(lines []string) map[complex64]int {
@@ -48,18 +75,14 @@ func findMin(grid map[complex64]int, end complex64) int {
 	visited := map[string]bool{}
 	queue := []Block{{0, 0, 1, 0}, {0, 0, 1i, 0}}
 
-	for len(queue) > 0 {
-		id := 0
-		// TODO: use PriorityQueue
-		for i, val := 1, queue[0].cost; i < len(queue); i++ {
-			if queue[i].cost < val {
-				val = queue[i].cost
-				id = i
-			}
-		}
+	pq := make(PriorityQueue, len(queue))
+	for i, priority := range queue {
+		pq[i] = &priority
+	}
+	heap.Init(&pq)
 
-		b := queue[id]
-		queue = append(queue[:id], queue[id+1:]...)
+	for pq.Len() > 0 {
+		b := heap.Pop(&pq).(*Block)
 		if visited[b.String()] {
 			continue
 		}
@@ -71,17 +94,17 @@ func findMin(grid map[complex64]int, end complex64) int {
 
 		dir := b.dir
 		if pos := b.pos + dir; b.c < 3 && grid[pos] != 0 {
-			queue = append(queue, Block{b.cost + grid[pos], pos, dir, b.c + 1})
+			heap.Push(&pq, &Block{b.cost + grid[pos], pos, dir, b.c + 1})
 		}
 
 		dir = dir * 1i // rotate 90deg
 		if pos := b.pos + dir; grid[pos] != 0 {
-			queue = append(queue, Block{b.cost + grid[pos], pos, dir, 1})
+			heap.Push(&pq, &Block{b.cost + grid[pos], pos, dir, 1})
 		}
 
 		dir = dir * (-1) // rotate 180deg -> -90deg from initial
 		if pos := b.pos + dir; grid[pos] != 0 {
-			queue = append(queue, Block{b.cost + grid[pos], pos, dir, 1})
+			heap.Push(&pq, &Block{b.cost + grid[pos], pos, dir, 1})
 		}
 	}
 
