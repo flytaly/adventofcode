@@ -67,11 +67,11 @@ type Block struct {
 	c    int // consecutive
 }
 
-func (b Block) String() string {
+func (b Block) id() string {
 	return fmt.Sprintf("%v,%v,%d", b.pos, b.dir, b.c)
 }
 
-func findMin(grid map[complex64]int, end complex64) int {
+func findMin(grid map[complex64]int, end complex64, ultra bool) int {
 	visited := map[string]bool{}
 	queue := []Block{{0, 0, 1, 0}, {0, 0, 1i, 0}}
 
@@ -83,27 +83,33 @@ func findMin(grid map[complex64]int, end complex64) int {
 
 	for pq.Len() > 0 {
 		b := heap.Pop(&pq).(*Block)
-		if visited[b.String()] {
+		if visited[b.id()] {
 			continue
 		}
-		visited[b.String()] = true
+		visited[b.id()] = true
 
-		if b.pos == end {
+		canStop, maxC := true, 3
+		if ultra {
+			maxC = 10
+			canStop = b.c >= 4
+		}
+
+		if b.pos == end && canStop {
 			return b.cost
 		}
 
 		dir := b.dir
-		if pos := b.pos + dir; b.c < 3 && grid[pos] != 0 {
+		if pos := b.pos + dir; grid[pos] != 0 && b.c < maxC {
 			heap.Push(&pq, &Block{b.cost + grid[pos], pos, dir, b.c + 1})
 		}
 
 		dir = dir * 1i // rotate 90deg
-		if pos := b.pos + dir; grid[pos] != 0 {
+		if pos := b.pos + dir; grid[pos] != 0 && canStop {
 			heap.Push(&pq, &Block{b.cost + grid[pos], pos, dir, 1})
 		}
 
 		dir = dir * (-1) // rotate 180deg -> -90deg from initial
-		if pos := b.pos + dir; grid[pos] != 0 {
+		if pos := b.pos + dir; grid[pos] != 0 && canStop {
 			heap.Push(&pq, &Block{b.cost + grid[pos], pos, dir, 1})
 		}
 	}
@@ -116,7 +122,15 @@ func PartOne(lines []string) {
 
 	end := complex(float32(len(lines)-1), float32(len(lines[0])-1))
 
-	fmt.Println("Part 1:", findMin(grid, end))
+	fmt.Println("Part 1:", findMin(grid, end, false))
+}
+
+func PartTwo(lines []string) {
+	grid := parse(lines)
+
+	end := complex(float32(len(lines)-1), float32(len(lines[0])-1))
+
+	fmt.Println("Part 2:", findMin(grid, end, true))
 }
 
 func main() {
@@ -126,4 +140,5 @@ func main() {
 	}
 	lines := readLines(inputFile)
 	PartOne(lines)
+	PartTwo(lines) //1048 low
 }
