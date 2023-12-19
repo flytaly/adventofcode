@@ -112,6 +112,71 @@ func PartOne(lines []string) {
 	fmt.Println("Part 1:", res)
 }
 
+func Clone[M ~map[K]V, K comparable, V any](m M) M {
+	r := make(M, len(m))
+	for k, v := range m {
+		r[k] = v
+	}
+	return r
+}
+
+type LH struct {
+	l, h int
+}
+type Rating map[string]LH
+
+func (r Rating) prod() int {
+	p := 1
+	for _, lh := range r {
+		p *= lh.h - lh.l + 1
+	}
+	return p
+}
+
+func solve(workflows map[string][]string, id string, rtng Rating) int {
+	res := 0
+	for _, flow := range workflows[id] {
+		rule := parseRule(flow)
+		sign, ctg, num, dest := rule.sign, rule.ctg, rule.num, rule.dest
+		if ctg == "" {
+			if dest == "A" {
+				return res + rtng.prod()
+			}
+			if dest == "R" {
+				return res
+			}
+			res += solve(workflows, dest, rtng)
+			continue
+		}
+
+		fit := Clone(rtng)
+		if sign == '<' {
+			fit[ctg] = LH{fit[ctg].l, num - 1}
+			rtng[ctg] = LH{num, rtng[ctg].h}
+		}
+		if sign == '>' {
+			fit[ctg] = LH{num + 1, fit[ctg].h}
+			rtng[ctg] = LH{rtng[ctg].l, num}
+		}
+		if dest == "A" {
+			res += fit.prod()
+			continue
+		}
+		if dest == "R" {
+			continue
+		}
+		res += solve(workflows, dest, fit)
+	}
+	return res
+}
+
+func PartTwo(lines []string) {
+	workflows, _ := parse(lines)
+	rt := Rating{"a": {1, 4000}, "m": {1, 4000}, "s": {1, 4000}, "x": {1, 4000}}
+	res := solve(workflows, "in", rt)
+	fmt.Println("Part 2:", res)
+}
+
 func main() {
 	var inputFile = "input.txt"
 	if len(os.Args) > 1 {
@@ -119,4 +184,5 @@ func main() {
 	}
 	lines := readLines(inputFile)
 	PartOne(lines)
+	PartTwo(lines)
 }
