@@ -192,7 +192,7 @@ func Pow2(n int) int {
 	return n * n
 }
 
-func PartTwo2(lines []string) {
+func PartTwo(lines []string) {
 	grid := parse(lines)
 	start := removeStart(grid)
 
@@ -238,6 +238,5 @@ func main() {
 	}
 	lines := readLines(inputFile)
 	PartOne(lines)
-	// PartTwo(lines)
-	PartTwo2(lines)
+	PartTwo(lines)
 }
