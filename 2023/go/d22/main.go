@@ -124,12 +124,25 @@ func fallSym(briks []Brik) Levels {
 	return levels
 }
 
-func PartOne(lines []string) {
+type BrikSet map[int]sets.Set[int]
+
+// briks above that depened on the current brik
+func (b BrikSet) dependent(bellowId int, supported BrikSet) []int {
+	briks := []int{}
+	for above := range b[bellowId] {
+		if supported[above].Len() < 2 {
+			briks = append(briks, above)
+		}
+	}
+	return briks
+}
+
+func solve(lines []string) {
 	briks := parseBriks(lines)
 
 	levels := fallSym(briks)
-	support := map[int]sets.Set[int]{}
-	supported := map[int]sets.Set[int]{}
+	support := BrikSet{}
+	supported := BrikSet{}
 	for _, v := range briks {
 		support[v.idx] = sets.New[int]()
 		supported[v.idx] = sets.New[int]()
@@ -150,19 +163,36 @@ func PartOne(lines []string) {
 	// fmt.Println(supported)
 
 	count := 0
-	// check if every brik above has more than one support
 	for _, brik := range briks {
-		haveOtherSupport := 1
-		for above := range support[brik.idx] {
-			if supported[above].Len() < 2 {
-				haveOtherSupport = 0
-				break
+		dep := support.dependent(brik.idx, supported)
+		if len(dep) == 0 {
+			count++
+		}
+	}
+	fmt.Println("Part 1:", count)
+
+	// Part 2
+	count = 0
+	for _, brik := range briks {
+		depQ := support.dependent(brik.idx, supported)
+		fallSet := sets.New[int](depQ...)
+		fallSet.Insert(brik.idx)
+
+		for len(depQ) > 0 {
+			current := depQ[0]
+			depQ = depQ[1:]
+			for above := range support[current].Difference(fallSet) {
+				diff := supported[above].Difference(fallSet)
+				if diff.Len() == 0 {
+					fallSet.Insert(above)
+					depQ = append(depQ, above)
+				}
 			}
 		}
-		count += haveOtherSupport
+		count += (fallSet.Len() - 1)
 	}
 
-	fmt.Println("Part 1:", count)
+	fmt.Println("Part 2:", count)
 }
 
 func main() {
@@ -171,5 +201,5 @@ func main() {
 		inputFile = os.Args[1]
 	}
 	lines := readLines(inputFile)
-	PartOne(lines) //497
+	solve(lines)
 }
