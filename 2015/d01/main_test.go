@@ -1,38 +1,18 @@
 package main
 
 import (
-	"fmt"
+	"aoc/utils"
 	"testing"
 )
 
 func TestD1(t *testing.T) {
 	t.Run("p1", func(t *testing.T) {
-		tests := []struct {
-			input string
-			want  int
-		}{{"(())", 0}, {"))(((((", 3}, {"())", -1}, {")())())", -3}}
-
-		for i, v := range tests {
-			t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-				if got := PartOne(v.input); got != v.want {
-					t.Errorf("PartOne() = %v, want %v", got, v.want)
-				}
-			})
-		}
+		tests := utils.TestSuite[string, int]{{"(())", 0}, {"))(((((", 3}, {"())", -1}, {")())())", -3}}
+		tests.Run(t, PartOne)
 	})
 
 	t.Run("p2", func(t *testing.T) {
-		tests := []struct {
-			input string
-			want  int
-		}{{")", 1}, {"()())", 5}}
-
-		for i, v := range tests {
-			t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-				if got := PartTwo(v.input); got != v.want {
-					t.Errorf("PartTwo() = %v, want %v", got, v.want)
-				}
-			})
-		}
+		tests := utils.TestSuite[string, int]{{")", 1}, {"()())", 5}}
+		tests.Run(t, PartTwo)
 	})
 }
