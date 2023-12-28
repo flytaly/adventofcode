@@ -1,17 +1,19 @@
 package utils
 
 import (
+	"fmt"
 	"os"
-	"path"
 	"path/filepath"
-	"runtime"
 	"strings"
 )
 
 func ReadLines(inputFile string) []string {
-	_, filename, _, _ := runtime.Caller(0)
 	if !filepath.IsAbs(inputFile) {
-		inputFile = filepath.Join(path.Dir(filename), inputFile)
+		path, err := os.Getwd()
+		if err != nil {
+			fmt.Println(err)
+		}
+		inputFile = filepath.Join(path, inputFile)
 	}
 	f, err := os.ReadFile(inputFile)
 	if err != nil {
