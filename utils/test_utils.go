@@ -12,6 +12,7 @@ type TestSuite[I any, W any] []struct {
 }
 
 func (tests TestSuite[I, W]) Run(t *testing.T, fn func(I) W) {
+	t.Helper()
 	for i, v := range tests {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
 			if got := fn(v.Input); !reflect.DeepEqual(got, v.Want) {
