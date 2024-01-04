@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/flytaly/adventofcode/2023/go/d23/d23"
+	"aoc/2023/d23/d23"
 )
 
 func readLines(inputFile string) []string {

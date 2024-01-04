@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/flytaly/adventofcode/2023/go/d07/p1"
-	"github.com/flytaly/adventofcode/2023/go/d07/p2"
+	"aoc/2023/d07/p1"
+	"aoc/2023/d07/p2"
 )
 
 const inputFile = "input.txt"
