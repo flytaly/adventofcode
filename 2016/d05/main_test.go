@@ -11,4 +11,9 @@ func TestMain(t *testing.T) {
 			{"abc", "18f47a30"}}
 		tests.Run(t, PartOne)
 	})
+	t.Run("p2", func(t *testing.T) {
+		tests := utils.TestSuite[string, string]{
+			{"abc", "05ace8e3"}}
+		tests.Run(t, PartTwo)
+	})
 }

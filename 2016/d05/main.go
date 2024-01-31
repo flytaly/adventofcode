@@ -35,6 +35,30 @@ func PartOne(id string) (password string) {
 	return password
 }
 
+func PartTwo(id string) (password string) {
+	var hash [16]byte
+	index := -1
+	count := 0
+	passParts := [8]string{}
+	for i := range passParts {
+		passParts[i] = "_"
+	}
+
+	for count < 8 {
+		index, hash = hashWithPrefix(id, 5, index+1)
+		h16 := fmt.Sprintf("%x", hash)
+		pos := h16[5] - '0'
+		if pos > 7 || passParts[pos] != "_" {
+			continue
+		}
+		passParts[pos] = string(h16[6])
+		count++
+	}
+
+	fmt.Println(passParts)
+	return strings.Join(passParts[:], "")
+}
+
 func main() {
 	lines := []string{""}
 	if len(os.Args) > 1 {
@@ -42,4 +66,5 @@ func main() {
 		lines = utils.ReadLines(inputFile)
 	}
 	fmt.Println("PartOne: ", PartOne(lines[0]))
+	fmt.Println("PartTwo: ", PartTwo(lines[0]))
 }
