@@ -55,7 +55,6 @@ func PartTwo(id string) (password string) {
 		count++
 	}
 
-	fmt.Println(passParts)
 	return strings.Join(passParts[:], "")
 }
 
