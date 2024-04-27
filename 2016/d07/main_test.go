@@ -15,4 +15,14 @@ func TestMain(t *testing.T) {
 		}
 		tests.Run(t, supportTLS)
 	})
+
+	t.Run("p2", func(t *testing.T) {
+		tests := utils.TestSuite[string, bool]{
+			{"aba[bab]xyz", true},
+			{"xyx[xyx]xyx", false},
+			{"aaa[kek]eke", true},
+			{"zazbz[bzb]cdb", true},
+		}
+		tests.Run(t, supportSSL)
+	})
 }
