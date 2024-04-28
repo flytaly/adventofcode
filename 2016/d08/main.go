@@ -130,6 +130,21 @@ func PartOne(lines []string) (count int) {
 	return grid.count()
 }
 
+func PartTwo(lines []string) string {
+	grid := lightGrid(lines, 50, 6)
+	res := ""
+	for y := 0; y < grid.h; y++ {
+		for x := 0; x < grid.w; x++ {
+			if grid.points[P{x, y}] {
+				res += "██"
+			} else {
+				res += "  "
+			}
+		}
+		res += "\n"
+	}
+	return res
+}
 
 func main() {
 	lines := []string{}
@@ -138,4 +153,5 @@ func main() {
 		lines = utils.ReadLines(inputFile)
 	}
 	fmt.Println("PartOne: ", PartOne(lines))
+	fmt.Println("PartTwo:\n", PartTwo(lines))
 }
