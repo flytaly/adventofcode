@@ -48,8 +48,24 @@ func parse(lines []string) (chips map[int][]int, ops map[int]Op) {
 	return chips, ops
 }
 
-func PartOne(lines []string, num1, num2 int) int {
+func Process(lines []string, num1, num2 int, isPartOne bool) int {
 	botChips, ops := parse(lines)
+	outputs := map[int]int{}
+
+	check := func(bot, l, h int) (bool, int) {
+		if isPartOne {
+			if l == min(num1, num2) && h == max(num1, num2) {
+				return true, bot
+			}
+			return false, 0
+		}
+
+		if outputs[0] != 0 && outputs[1] != 0 && outputs[2] != 0 {
+			return true, outputs[0] * outputs[1] * outputs[2]
+		}
+		return false, 0
+	}
+
 	for count := 0; count != len(botChips); {
 		for bot, chips := range botChips {
 			if len(chips) != 2 {
@@ -58,9 +74,6 @@ func PartOne(lines []string, num1, num2 int) int {
 			}
 			op := ops[bot]
 			l, h := min(chips[0], chips[1]), max(chips[0], chips[1])
-			if l == min(num1, num2) && h == max(num1, num2) {
-				return bot
-			}
 			if op.lowDest == Bot && len(botChips[op.lowId]) < 2 {
 				botChips[op.lowId] = append(botChips[op.lowId], l)
 				botChips[bot] = []int{h}
@@ -70,13 +83,15 @@ func PartOne(lines []string, num1, num2 int) int {
 				botChips[bot] = []int{l}
 			}
 			if op.lowDest == Output {
+				outputs[op.lowId] = l
 				botChips[bot] = []int{h}
 			}
 			if op.highDest == Output {
+				outputs[op.highId] = h
 				botChips[bot] = []int{l}
 			}
-			if l == min(num1, num2) && h == max(num1, num2) {
-				return bot
+			if isEnd, value := check(bot, l, h); isEnd {
+				return value
 			}
 		}
 	}
@@ -90,5 +105,6 @@ func main() {
 		inputFile := os.Args[1]
 		lines = utils.ReadLines(inputFile)
 	}
-	fmt.Println("PartOne: ", PartOne(lines, 17, 61))
+	fmt.Println("PartOne: ", Process(lines, 17, 61, true))
+	fmt.Println("PartTwo: ", Process(lines, 17, 61, false))
 }

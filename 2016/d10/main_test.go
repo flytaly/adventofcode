@@ -16,7 +16,7 @@ func TestMain(t *testing.T) {
 			"value 2 goes to bot 2",
 		}
 		want := 2
-		if got := PartOne(lines, 2, 5); !reflect.DeepEqual(got, want) {
+		if got := Process(lines, 2, 5, true); !reflect.DeepEqual(got, want) {
 			t.Errorf("got %v, want %v", got, want)
 		}
 	})
