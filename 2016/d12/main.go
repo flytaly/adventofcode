@@ -8,8 +8,7 @@ import (
 	"strings"
 )
 
-func PartOne(lines []string) int {
-	regs := map[string]int{}
+func execute(lines []string, regs map[string]int) int {
 	for i := 0; i < len(lines); i++ {
 		split := strings.Split(lines[i], " ")
 		switch split[0] {
@@ -45,5 +44,6 @@ func main() {
 		inputFile := os.Args[1]
 		lines = utils.ReadLines(inputFile)
 	}
-	fmt.Println("PartOne: ", PartOne(lines))
+	fmt.Println("PartOne: ", execute(lines, map[string]int{}))
+	fmt.Println("PartTwo: ", execute(lines, map[string]int{"c": 1}))
 }

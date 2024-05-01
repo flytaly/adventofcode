@@ -16,7 +16,7 @@ func TestMain(t *testing.T) {
 			"dec a",
 		}
 		want := 42
-		if got := PartOne(lines); !reflect.DeepEqual(got, want) {
+		if got := execute(lines, map[string]int{}); !reflect.DeepEqual(got, want) {
 			t.Errorf("got %v, want %v", got, want)
 		}
 	})
