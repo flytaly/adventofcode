@@ -103,10 +103,38 @@ func PartOne(n int, xTarget, yTarget int) int {
 	}
 }
 
+// bfs
+func PartTwo(n int, steps int) int {
+	visited := map[Coords]bool{{1, 1}: true}
+	count := 1
+	dirs := [][]int{{-1, 0}, {1, 0}, {0, -1}, {0, 1}}
+
+	frontier := []Coords{{1, 1}}
+	for i := 0; i < steps; i++ {
+		nextFront := make([]Coords, 0)
+		for _, current := range frontier {
+			for _, dir := range dirs {
+				coords := Coords{current.x + dir[0], current.y + dir[1]}
+				if coords.x < 0 || coords.y < 0 || visited[coords] {
+					continue
+				}
+				visited[coords] = true
+				if !isItAWall(coords.x, coords.y, n) {
+					count++
+					nextFront = append(nextFront, coords)
+				}
+			}
+		}
+		frontier = nextFront
+	}
+	return count
+}
+
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Println("Test:")
 		fmt.Println("PartOne: ", PartOne(10, 7, 4))
+		fmt.Println("PartTwo: ", PartTwo(10, 6))
 		return
 	}
 	input, err := strconv.Atoi(os.Args[1])
@@ -114,4 +142,5 @@ func main() {
 		panic(err)
 	}
 	fmt.Println("PartOne: ", PartOne(input, 31, 39))
+	fmt.Println("PartTwo: ", PartTwo(input, 50))
 }
