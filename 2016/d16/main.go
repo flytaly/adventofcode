@@ -3,57 +3,53 @@ package main
 import (
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 )
 
-func xnor(a, b int) int {
+func xnor(a, b byte) byte {
 	return ^(a ^ b) & 1
 }
 
-func toB(a string) int {
-	if a == "0" {
-		return 0
-	}
-	return 1
-}
+// Use a slice of bytes, because string manipulation is not efficient.
+func extend(input string, size int) []byte {
+	res := make([]byte, size)
 
-func extend(input string, size int) string {
-	if len(input) >= size {
-		return input[:size]
-	}
-	b := ""
-	for i := len(input) - 1; i >= 0; i-- { // reverse + inverse
+	for i := 0; i < len(input); i++ {
 		if input[i] == '1' {
-			b += "0"
+			res[i] = 1
 			continue
 		}
-		b += "1"
+		res[i] = 0
 	}
-	res := input + "0" + b
-	return extend(res, size)
+	// pointer points to the end of previous siquence
+	for pointer := len(input); pointer < size; pointer = pointer*2 + 1 {
+		res[pointer] = 0
+		for i := 1; i <= pointer; i++ {
+			if pointer+i >= size {
+				return res
+			}
+			res[pointer+i] = 1 - res[pointer-i] // reverse and inverse bits
+		}
+	}
+	return res
 }
 
 func checksum(input string, strLen int) string {
-	if len(input) < strLen {
-		input = extend(input, strLen)
-	}
-	oddLen := len(input)
+	inputBits := extend(input, strLen)
+	oddLen := strLen
 	for ; oddLen%2 == 0; oddLen /= 2 {
 	}
-	parts, partLen := []string{}, len(input)/oddLen
-	for i := 0; i < len(input); i += partLen {
-		parts = append(parts, input[i:i+partLen])
-	}
+	partLen := strLen / oddLen
+
 	var sb strings.Builder
-	for _, part := range parts {
-		r := 1
-		for i := 0; i < len(part); i += 2 {
-			a, b := part[i:i+1], part[i+1:i+2]
-			r ^= xnor(toB(a), toB(b))
+	zero := byte('0')
+	for partStart := 0; partStart < strLen; partStart += partLen {
+		r := byte(1)
+		for i := partStart; i < partStart+partLen; i += 2 {
+			r ^= xnor(inputBits[i], inputBits[i+1])
 		}
-		sb.WriteString(strconv.Itoa(r))
+		sb.WriteByte(zero + r)
 	}
 
 	return sb.String()
@@ -67,4 +63,8 @@ func main() {
 	}
 	ts := time.Now()
 	fmt.Printf("PartOne(%s, %d): %s [%s] \n", input, length, checksum(input, length), time.Since(ts))
+
+	length = 35651584
+	ts = time.Now()
+	fmt.Printf("PartTwo(%s, %d): %s [%s] \n", input, length, checksum(input, length), time.Since(ts))
 }
