@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"slices"
+	"strconv"
 )
 
 var room = []string{
@@ -12,7 +13,7 @@ var room = []string{
 	"#    #",
 	"#    #",
 	"#    #",
-	"#    V",
+	"#   XV",
 	"####VV",
 }
 
@@ -31,7 +32,7 @@ type Position struct {
 	code []byte
 }
 
-func findPath(passcode []byte) string {
+func findPath(passcode []byte, isPartTwo bool) string {
 	dirs := [][]int{
 		{-1, 0}, // up
 		{1, 0},  // down
@@ -41,8 +42,12 @@ func findPath(passcode []byte) string {
 	dirChars := []byte{'U', 'D', 'L', 'R'}
 
 	queue := []Position{{pos: []int{1, 1}, code: passcode}}
+	maxLen := 0
 	for {
 		if len(queue) == 0 {
+			if isPartTwo {
+				return strconv.Itoa(maxLen)
+			}
 			fmt.Println("no	more moves")
 			return ""
 		}
@@ -58,6 +63,13 @@ func findPath(passcode []byte) string {
 				}
 				nextPos := []int{pos[0] + dir[0], pos[1] + dir[1]}
 				switch getCell(nextPos) {
+				case 'X':
+					if isPartTwo {
+						if length := len(step.code) - len(passcode) + 1; length > maxLen {
+							maxLen = length
+						}
+						continue
+					}
 				case 'V':
 					path := string(step.code[len(passcode):])
 					if minPath == "" || len(path) <= len(minPath) {
@@ -85,5 +97,6 @@ func main() {
 	if len(os.Args) > 1 {
 		input = os.Args[1]
 	}
-	fmt.Println("PartOne: ", findPath([]byte(input)))
+	fmt.Println("PartOne: ", findPath([]byte(input), false))
+	fmt.Println("PartTwo: ", findPath([]byte(input), true))
 }
