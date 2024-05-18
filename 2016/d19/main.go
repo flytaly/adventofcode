@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"os"
 	"strconv"
 )
@@ -36,9 +35,14 @@ func P1Loop(total int) int {
 // 1  1 3  1 3 5 7  1 3 5  7  9  11 13 15
 func P1Analitic(total int) int {
 	// prevous power of 2
-	pow2 := math.Floor(math.Log2(float64(total)))
-	reset := int(math.Pow(2, pow2))
-	return (total-reset)*2 + 1
+	// pow2 := math.Floor(math.Log2(float64(total)))
+	// reset := int(math.Pow(2, pow2))
+	// return (total-reset)*2 + 1
+	// or
+	b := strconv.FormatInt(int64(total), 2)
+	b = b[1:] + b[0:1]
+	c, _ := strconv.ParseInt(b, 2, 64)
+	return int(c)
 }
 
 func main() {
