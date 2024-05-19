@@ -45,6 +45,17 @@ func P1Analitic(total int) int {
 	return int(c)
 }
 
+func P2(total int) int {
+	res := 1
+	for i := 1; i < total; i++ {
+		res = res%i + 1
+		if res > (i+1)/2 {
+			res++
+		}
+	}
+	return res
+}
+
 func main() {
 	input := 7
 	if len(os.Args) > 1 {
@@ -55,4 +66,5 @@ func main() {
 		}
 	}
 	fmt.Printf("PartOne(%d): %d\n", input, P1Analitic(input))
+	fmt.Printf("PartTwo(%d): %d\n", input, P2(input))
 }
