@@ -132,13 +132,52 @@ func parseOps(input []string) []Op {
 	return ops
 }
 
+func scramble(p []byte, ops []Op) string {
+	pass := make([]byte, len(p))
+	copy(pass, p)
+	for _, op := range ops {
+		op.process(pass)
+	}
+	return string(pass)
+}
+
 func P1(input []string, start string) string {
 	ops := parseOps(input)
 	password := []byte(start)
-	for _, op := range ops {
-		op.process(password)
+	return scramble(password, ops)
+}
+
+func nextPerm(p []int) {
+	for i := len(p) - 1; i >= 0; i-- {
+		if i == 0 || p[i] < len(p)-i-1 {
+			p[i]++
+			return
+		}
+		p[i] = 0
 	}
-	return string(password)
+}
+
+func getPerm[T any](orig []T, p []int) []T {
+	result := append([]T{}, orig...)
+	for i, v := range p {
+		result[i], result[i+v] = result[i+v], result[i]
+	}
+	return result
+}
+
+// just brute-force
+// TODO: make proper un-scramble
+func P2(input []string, start string) string {
+	ops := parseOps(input)
+	scrambled := []byte(start)
+	for p := make([]int, len(scrambled)); p[0] < len(p); nextPerm(p) {
+		testPass := getPerm(scrambled, p)
+		if scramble(testPass, ops) == start {
+			return string(testPass)
+		}
+
+	}
+	return ""
 }
 
 func main() {
@@ -159,4 +198,5 @@ func main() {
 		start = "abcdefgh"
 	}
 	fmt.Println("PartOne: ", P1(lines, start))
+	fmt.Println("PartTwo: ", P2(lines, "fbgdceah"))
 }
