@@ -40,7 +40,7 @@ func divisible(nums []int) (int, int) {
 			}
 		}
 	}
-	return 2, 2
+	return 1, 0
 }
 
 func P2(input []string) (sum int) {
