@@ -14,4 +14,15 @@ func TestMain(t *testing.T) {
 		}
 		tests.Run(t, isValid1)
 	})
+
+	t.Run("p2", func(t *testing.T) {
+		tests := utils.TestSuite[string, bool]{
+			{"abcde fghij", true},
+			{"abcde xyz ecdab", false},
+			{"a ab abc abd abf abj ", true},
+			{"iiii oiii ooii oooi oooo", true},
+			{"oiii ioii iioi iiio ", false},
+		}
+		tests.Run(t, isValid2)
+	})
 }
