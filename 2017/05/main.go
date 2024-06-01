@@ -17,6 +17,21 @@ func P1(input []string) (count int) {
 	return count
 }
 
+func P2(input []string) (count int) {
+	jumps := utils.ToInts(input)
+	for pos := 0; pos < len(jumps); count++ {
+		jump := jumps[pos]
+		change := 1
+		if jumps[pos] >= 3 {
+			change = -1
+		}
+		jumps[pos] += change
+		pos += jump
+	}
+
+	return count
+}
+
 func main() {
 	lines := []string{
 		"0",
@@ -30,4 +45,5 @@ func main() {
 		lines = utils.ReadLines(inputFile)
 	}
 	fmt.Println("Part 1 => ", P1(lines))
+	fmt.Println("Part 2 => ", P2(lines))
 }
