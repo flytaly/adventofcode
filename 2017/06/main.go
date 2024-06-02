@@ -28,21 +28,21 @@ func reallocate(nums *[]int, index int) {
 	}
 }
 
-func P1(input []string) (count int) {
+func cycles(input []string) (int, int) {
 	split := regexp.MustCompile(`\s`).Split(input[0], -1)
 	nums := utils.ToInts(split)
 
-	states := map[string]bool{}
+	states := map[string]int{}
 
-	for count = 1; ; count++ {
+	for count := 1; ; count++ {
 		index := maxIndex(nums)
 		reallocate(&nums, index)
 		bytes, _ := json.Marshal(nums)
 		state := string(bytes)
-		if states[state] {
-			return count
+		if _, has := states[state]; has {
+			return count, count - states[state]
 		}
-		states[state] = true
+		states[state] = count
 	}
 }
 
@@ -52,5 +52,7 @@ func main() {
 		inputFile := os.Args[1]
 		lines = utils.ReadLines(inputFile)
 	}
-	fmt.Println("Part 1 =>", P1(lines))
+	p1, p2 := cycles(lines)
+	fmt.Println("Part 1 =>", p1)
+	fmt.Println("Part 2 =>", p2)
 }
