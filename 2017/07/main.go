@@ -9,52 +9,131 @@ import (
 	"strings"
 )
 
+type G map[string]*Node
+
 type Node struct {
-	name  string
-	value int
-	next  *Node
-	prev  *Node
+	name     string
+	weight   int
+	children G
+	parent   *Node
 }
 
 func parseNode(str string) *Node {
 	re := regexp.MustCompile(`(\w+)(?:\s\((\d+)\))`)
 	match := re.FindAllStringSubmatch(str, -1)
-	node := Node{name: match[0][1]}
+	node := Node{name: match[0][1], children: make(G)}
 	if len(match[0]) == 3 {
-		node.value, _ = strconv.Atoi(match[0][2])
+		node.weight, _ = strconv.Atoi(match[0][2])
 	}
 	return &node
 
 }
 
-func P1(input []string) string {
-	nodes := map[string]*Node{}
+func makeGraph(input []string) (nodes G, root string) {
+	nodes = G{}
 	for _, line := range input {
 		split := strings.Split(line, " -> ")
 		node := parseNode(split[0])
-		if _, exist := nodes[node.name]; !exist {
-			nodes[node.name] = node
+		if existed, exist := nodes[node.name]; exist {
+			existed.weight = node.weight
+			node = existed
 		}
+		nodes[node.name] = node
+
 		if len(split) <= 1 {
 			continue
 		}
 		children := strings.Split(split[1], ", ")
-		for _, child := range children {
-			if childNode, exist := nodes[child]; exist {
-				childNode.prev = node
-				node.next = childNode
+		for _, childName := range children {
+			if childNode, exist := nodes[childName]; exist {
+				childNode.parent = node
+				node.children[childNode.name] = childNode
 			} else {
-				childNode := &Node{name: child, prev: node}
-				nodes[child] = childNode
+				newChild := &Node{name: childName, parent: node, children: make(G)}
+				node.children[newChild.name] = newChild
+				nodes[childName] = newChild
 			}
 		}
 	}
 	for _, n := range nodes {
-		if n.prev == nil {
-			return n.name
+		if n.parent == nil {
+			root = n.name
+			break
 		}
 	}
-	return ""
+	return nodes, root
+}
+
+func P1(input []string) string {
+	_, root := makeGraph(input)
+	return root
+}
+
+func allSame(nums map[string]int) bool {
+	prev := -1
+	for _, v := range nums {
+		if prev != -1 && v != prev {
+			return false
+		}
+		prev = v
+	}
+	return true
+
+}
+
+func getException(nums map[string]int) (string, int) {
+	vals := map[int]int{}
+	for _, n := range nums {
+		vals[n]++
+	}
+	var exception int
+	var others int
+	for num, count := range vals {
+		if count == 1 {
+			exception = num
+		} else {
+			others = num
+		}
+	}
+	diff := exception - others
+	name := ""
+
+	for n, val := range nums {
+		if val == exception {
+			name = n
+		}
+	}
+
+	return name, diff
+}
+
+// recursively found the deepest unbalanced node and return it's value after rebalnce
+func getWeight(g G, root string) (total int, children map[string]int, answer int) {
+	node := g[root]
+	total = node.weight
+
+	childrenWeights := map[string]int{}
+	for _, child := range node.children {
+		w, _, res := getWeight(g, child.name)
+		if res != 0 {
+			answer = res
+		}
+		total += w
+		childrenWeights[child.name] = w
+	}
+
+	if answer == 0 && !allSame(childrenWeights) {
+		name, diff := getException(childrenWeights)
+		answer = g[name].weight - diff
+	}
+
+	return total, childrenWeights, answer
+}
+
+func P2(input []string) int {
+	nodes, root := makeGraph(input)
+	_, _, result := getWeight(nodes, root)
+	return result
 }
 
 func main() {
@@ -78,4 +157,5 @@ func main() {
 		lines = utils.ReadLines(inputFile)
 	}
 	fmt.Println("Part 1 =>", P1(lines))
+	fmt.Println("Part 2 =>", P2(lines))
 }
