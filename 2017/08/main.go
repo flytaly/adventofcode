@@ -79,6 +79,23 @@ func P1(input []string) (largest int) {
 	return largest
 }
 
+func P2(input []string) (largest int) {
+	parsed := parse(input)
+	regs := map[string]int{}
+	largest = math.MinInt
+
+	for _, instruction := range parsed {
+		if condition(regs, instruction) {
+			operation(&regs, instruction)
+			if v := regs[instruction.targetReg]; v > largest {
+				largest = v
+			}
+		}
+	}
+
+	return largest
+}
+
 func main() {
 	lines := []string{
 		"b inc 5 if a > 1",
@@ -91,4 +108,5 @@ func main() {
 		lines = utils.ReadLines(inputFile)
 	}
 	fmt.Println("Part 1 =>", P1(lines))
+	fmt.Println("Part 2 =>", P2(lines))
 }
