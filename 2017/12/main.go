@@ -41,6 +41,21 @@ func P1(input []string) int {
 	dfs(parse(input), 0, &visited)
 	return len(visited)
 }
+
+func P2(input []string) (groups int) {
+	visited := map[int]bool{}
+	graph := parse(input)
+	for nodeValue := range graph {
+		if visited[nodeValue] {
+			continue
+		}
+		groups++
+		dfs(graph, nodeValue, &visited)
+	}
+
+	return groups
+}
+
 func main() {
 	lines := []string{
 		"0 <-> 2",
@@ -56,4 +71,5 @@ func main() {
 		lines = utils.ReadLines(inputFile)
 	}
 	fmt.Println("Part 1 =>", P1(lines))
+	fmt.Println("Part 2 =>", P2(lines))
 }
