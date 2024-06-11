@@ -37,12 +37,27 @@ func P1(input []string) (result int) {
 	layers, _ := parse(input)
 	for depth, layerRange := range layers {
 		pico := depth
-		if posAtStep(pico, layers[depth]) == 0 {
+		if posAtStep(pico, layerRange) == 0 {
 			result += layerRange * depth
 		}
 	}
-
 	return result
+}
+
+func P2(input []string) int {
+	layers, _ := parse(input)
+	for pico := 0; ; pico++ {
+		wasCaught := false
+		for depth, layerRange := range layers {
+			if posAtStep(pico+depth, layerRange) == 0 {
+				wasCaught = true
+				break
+			}
+		}
+		if !wasCaught {
+			return pico
+		}
+	}
 }
 
 func main() {
@@ -57,4 +72,5 @@ func main() {
 		lines = utils.ReadLines(inputFile)
 	}
 	fmt.Println("Part 1 =>", P1(lines))
+	fmt.Println("Part 2 =>", P2(lines))
 }
