@@ -21,12 +21,7 @@ func swap[T any](p []T, a, b int) {
 	p[a], p[b] = p[b], p[a]
 }
 
-func P1(input string, size int) (result string) {
-	programs := make([]byte, size)
-	for i := 0; i < size; i++ {
-		programs[i] = byte('a' + i)
-	}
-
+func dance(programs []byte, input string) {
 	ops := strings.Split(input, ",")
 	for _, op := range ops {
 		switch op[0] {
@@ -45,6 +40,41 @@ func P1(input string, size int) (result string) {
 		}
 	}
 
+}
+
+func P1(input string, size int) (result string) {
+	programs := make([]byte, size)
+	for i := 0; i < size; i++ {
+		programs[i] = byte('a' + i)
+	}
+
+	dance(programs, input)
+
+	return string(programs)
+}
+
+func P2(input string, size int) (result string) {
+	programs := make([]byte, size)
+	for i := 0; i < size; i++ {
+		programs[i] = byte('a' + i)
+	}
+
+	initial := string(programs)
+	total := 1_000_000_000
+	cycle := 0
+
+	for i := 0; i < total; i++ {
+		dance(programs, input)
+		if string(programs) == initial {
+			cycle = i + 1
+			break
+		}
+	}
+	fmt.Println("cycle in", cycle, "steps", "remainder", total%cycle)
+	for i := 0; i < total%cycle; i++ {
+		dance(programs, input)
+	}
+
 	return string(programs)
 }
 
@@ -57,4 +87,5 @@ func main() {
 		size = 16
 	}
 	fmt.Println("Part 1 =>", P1(lines[0], size))
+	fmt.Println("Part 2 =>", P2(lines[0], size))
 }
