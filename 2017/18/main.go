@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func P1(input []string) int {
@@ -52,22 +53,81 @@ func P1(input []string) int {
 	return -1
 }
 
+type Regs struct {
+	regs map[string]int
+}
+
+func (r Regs) get(numOrRegister string) int {
+	if numOrRegister[0] >= ('a') && numOrRegister[0] <= ('z') {
+		return r.regs[numOrRegister]
+	}
+	num, _ := strconv.Atoi(numOrRegister)
+	return num
+}
+
+func program(ops [][]string, id int, in, out, res chan int) {
+	regs := Regs{regs: map[string]int{"p": id}}
+	count := 0
+	for i := 0; i < len(ops); i++ {
+		fmt.Println(id, ops[i])
+		switch op := ops[i]; op[0] {
+		case "snd":
+			out <- regs.get(op[1])
+			count++
+		case "set":
+			regs.regs[op[1]] = regs.get(op[2])
+		case "add":
+			regs.regs[op[1]] += regs.get(op[2])
+		case "mul":
+			regs.regs[op[1]] *= regs.get(op[2])
+		case "mod":
+			regs.regs[op[1]] %= regs.get(op[2])
+		case "rcv":
+			select {
+			case regs.regs[op[1]] = <-in:
+			case <-time.After(500 * time.Millisecond):
+				res <- count
+				return
+			}
+		case "jgz":
+			if regs.get(op[1]) > 0 {
+				i += regs.get(op[2]) - 1
+			}
+		}
+	}
+	res <- count
+}
+
+func P2(input []string) int {
+	ops := make([][]string, len(input))
+
+	for i, op := range input {
+		ops[i] = strings.Split(op, " ")
+	}
+
+	chA, chB := make(chan int, 1000), make(chan int, 1000)
+	result := make(chan int)
+
+	go program(ops, 0, chA, chB, make(chan int))
+	go program(ops, 1, chB, chA, result)
+
+	return <-result
+}
+
 func main() {
 	lines := []string{
-		"set a 1",
-		"add a 2",
-		"mul a a",
-		"mod a 5",
-		"snd a",
-		"set a 0",
+		"snd 1",
+		"snd 2",
+		"snd p",
 		"rcv a",
-		"jgz a -1",
-		"set a 1",
-		"jgz a -2",
+		"rcv b",
+		"rcv c",
+		"rcv d",
 	}
 	if len(os.Args) > 1 {
 		inputFile := os.Args[1]
 		lines = utils.ReadLines(inputFile)
 	}
 	fmt.Println("Part 1 =>", P1(lines))
+	fmt.Println("Part 2 =>", P2(lines))
 }
