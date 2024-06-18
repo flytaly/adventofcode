@@ -86,10 +86,11 @@ func countLetters(maze Grid) (count int) {
 	return count
 }
 
-func P1(maze Grid) (result string) {
+func solve(maze Grid) (result string, count int) {
 	pos := Pos{0, strings.Index(maze[0], "|")}
 	letters := countLetters(maze)
-	for dir := Down; len(result) < letters; {
+	dir := Down
+	for count = 1; len(result) < letters; count++ {
 		nextPos := pos.clone()
 		nextPos.moveTo(dir)
 		if !maze.isInside(nextPos) {
@@ -116,7 +117,7 @@ func P1(maze Grid) (result string) {
 		dir = dir.turnLeft()
 	}
 
-	return result
+	return result, count
 }
 func main() {
 	lines := []string{
@@ -131,5 +132,7 @@ func main() {
 		inputFile := os.Args[1]
 		lines = utils.ReadLines(inputFile)
 	}
-	fmt.Println("Part 1 =>", P1(lines))
+	p1, p2 := solve(lines)
+	fmt.Println("Part 1 =>", p1)
+	fmt.Println("Part 1 =>", p2)
 }
