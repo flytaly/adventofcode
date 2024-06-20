@@ -88,14 +88,41 @@ func P1(input []string) int {
 	return pp[0].index
 }
 
+func P2(input []string) int {
+	particles := parse(input)
+	prevLen, collisionTick := len(particles), 0
+	// Stop if there are no changes in 100 ticks.
+	// Probably, there should be a better stopping condition,
+	// but it works anyway.
+	for tick := 0; tick-collisionTick < 100; tick++ {
+		places := map[Coords]int{}
+		for p := range particles {
+			particles[p].tick()
+			places[particles[p].p] += 1
+		}
+		particles = filter(particles, func(p Particle) bool {
+			return places[p.p] == 1
+		})
+		if prevLen != len(particles) {
+			collisionTick = tick
+			prevLen = len(particles)
+		}
+	}
+
+	return len(particles)
+}
+
 func main() {
 	lines := []string{
-		"p=<3,0,0>, v=<2,0,0>, a=<-1,0,0>",
-		"p=<4,0,0>, v=<0,0,0>, a=<-2,0,0>",
+		"p=<-6,0,0>, v=<3,0,0>, a=<0,0,0>",
+		"p=<-4,0,0>, v=<2,0,0>, a=<0,0,0>",
+		"p=<-2,0,0>, v=<1,0,0>, a=<0,0,0>",
+		"p=<3,0,0>, v=<-1,0,0>, a=<0,0,0>",
 	}
 	if len(os.Args) > 1 {
 		inputFile := os.Args[1]
 		lines = utils.ReadLines(inputFile)
 	}
 	fmt.Println("Part 1 =>", P1(lines))
+	fmt.Println("Part 2 =>", P2(lines))
 }
