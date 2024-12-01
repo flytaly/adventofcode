@@ -39,19 +39,20 @@ func PartOne(lists []string) {
 
 func PartTwo(lists []string) {
 	a, b := splitLists(lists)
+	slices.Sort(a)
+	slices.Sort(b)
 
-	res := 0
-	for _, v1 := range a {
-		count := 0
-		for _, v2 := range b {
-			if v1 == v2 {
+	result := 0
+	for _, value := range a {
+		if index, found := slices.BinarySearch(b, value); found {
+			count := 0
+			for ; index < len(b) && b[index] == value; index++ {
 				count++
 			}
+			result += value * count
 		}
-		res += v1 * count
 	}
-
-	fmt.Println("Part 2:", res)
+	fmt.Println("Part 2:", result)
 }
 
 func main() {
@@ -63,10 +64,12 @@ func main() {
 		"3   9",
 		"3   3",
 	}
+
 	if len(os.Args) > 1 {
 		inputFile := os.Args[1]
 		lines = utils.ReadLines(inputFile)
 	}
+
 	PartOne(lines)
 	PartTwo(lines)
 }
