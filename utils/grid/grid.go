@@ -20,6 +20,11 @@ type Grid[T GridValue] struct {
 	Left, Top, Right, Bottom int
 }
 
+var ToTop = image.Point{0, -1}
+var ToRight = image.Point{1, 0}
+var ToBottom = image.Point{0, 1}
+var ToLeft = image.Point{-1, 0}
+
 var Dirs = []image.Point{
 	{-1, -1},
 	{-1, 0},
@@ -62,6 +67,10 @@ func (g *Grid[t]) Span(p Point, dir image.Point, length int) []t {
 	return res
 }
 
+func (g Grid[T]) IsInside(p Point) bool {
+	return p.X >= g.Left && p.X <= g.Right && p.Y >= g.Top && p.Y <= g.Bottom
+}
+
 func CellToString(value interface{}) (string, error) {
 	switch v := value.(type) {
 	case int:
@@ -88,7 +97,7 @@ func (g Grid[T]) String() string {
 			return "couldn't convert value to string"
 		}
 		sb.WriteString(s)
-		end := " "
+		end := ""
 		if p.X == g.Right {
 			end = "\n"
 		}
@@ -118,11 +127,12 @@ func NewRuneGrid(lines []string) Grid[rune] {
 	return grid
 }
 
-func (g Grid[T]) PointsIter() iter.Seq[Point] {
-	return func(yield func(Point) bool) {
-		for y := g.Top; y <= g.Bottom; y++ {
-			for x := g.Left; x <= g.Right; x++ {
-				if !yield(Pt(x, y)) {
+func (grid Grid[T]) PointsIter() iter.Seq2[Point, T] {
+	return func(yield func(Point, T) bool) {
+		for y := grid.Top; y <= grid.Bottom; y++ {
+			for x := grid.Left; x <= grid.Right; x++ {
+				point := Pt(x, y)
+				if !yield(point, grid.At(point)) {
 					return
 				}
 			}
