@@ -59,6 +59,25 @@ func PartOne(lines []string) {
 	fmt.Println("Part 1:", result)
 }
 
+func PartTwo(lines []string) {
+	rules, updates := parse(lines)
+	result := 0
+
+	for _, update := range updates {
+		if !isCorrectUpdate(rules, update) {
+			slices.SortFunc(update, func(a, b string) int {
+				if slices.Contains(rules[a], b) {
+					return -1
+				}
+				return 1
+			})
+			result += getMiddle(update)
+		}
+	}
+
+	fmt.Println("Part 2:", result)
+}
+
 func main() {
 	lines := []string{
 		"47|53",
@@ -88,7 +107,7 @@ func main() {
 		"75,29,13",
 		"75,97,47,61,53",
 		"61,13,29",
-		"97,13,75,29,4",
+		"97,13,75,29,47",
 	}
 
 	if len(os.Args) > 1 {
@@ -97,4 +116,5 @@ func main() {
 	}
 
 	PartOne(lines)
+	PartTwo(lines)
 }
