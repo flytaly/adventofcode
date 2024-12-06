@@ -27,31 +27,85 @@ func getStartingPoint(grid Grid[string]) image.Point {
 func PartOne(lines []string) {
 	grid := NewStringGrid(lines)
 	pos := getStartingPoint(grid)
+
 	count := 1
 	grid.Set(pos, "X")
-	dir := ToTop
 
-	for {
+walk:
+	for dir := ToTop; ; {
 		nextPos := pos.Add(dir)
-		if grid.At(nextPos) == "#" {
-			dir = nextDir[dir]
-			continue
-		}
 
-		if !grid.IsInside(nextPos) {
-			break
-		}
-
-		if grid.At(nextPos) == "." {
+		switch grid.At(nextPos) {
+		case "":
+			break walk
+		case ".":
 			grid.Set(nextPos, "X")
 			count++
+		case "#":
+			dir = nextDir[dir]
+			continue walk
 		}
-
 		pos = nextPos
-
 	}
-	fmt.Println(grid)
+
+	// fmt.Println(grid)
 	fmt.Println("Part 1:", count)
+}
+
+func move(grid Grid[string], pos *image.Point, dir *image.Point) {
+	for {
+		nextPos := pos.Add(*dir)
+		cell := grid.At(nextPos)
+		if cell == "#" {
+			*dir = nextDir[*dir]
+			continue
+		}
+		*pos = nextPos
+		return
+	}
+}
+
+// Tortoise and Hare Algorithm
+func hasCycle(grid Grid[string], start image.Point) bool {
+	posT, dirT := start, ToTop
+	posH, dirH := start, ToTop
+	for {
+		move(grid, &posH, &dirH)
+		move(grid, &posH, &dirH)
+		move(grid, &posT, &dirT)
+		if !grid.IsInside(posH) {
+			return false
+		}
+		if posH.Eq(posT) && dirH.Eq(dirT) {
+			return true
+		}
+	}
+}
+
+func PartTwo(lines []string) {
+	grid := NewStringGrid(lines)
+	start := getStartingPoint(grid)
+
+	count := 0
+	checked := map[image.Point]bool{}
+	for pos, dir := start, ToTop; ; {
+		move(grid, &pos, &dir)
+		if !grid.IsInside(pos) {
+			break
+		}
+		if _, ok := checked[pos]; ok {
+			continue
+		}
+		if cell := grid.At(pos); cell != "#" {
+			grid.Set(pos, "#")
+			if hasCycle(grid, start) {
+				count++
+			}
+			grid.Set(pos, cell)
+			checked[pos] = true
+		}
+	}
+	fmt.Println("Part 2:", count)
 }
 
 func main() {
@@ -74,4 +128,5 @@ func main() {
 	}
 
 	PartOne(lines)
+	PartTwo(lines)
 }
