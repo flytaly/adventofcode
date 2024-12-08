@@ -22,7 +22,7 @@ func Combi2[T any](items []T) iter.Seq[[2]T] {
 	}
 }
 
-func PartOne(lines []string) {
+func Solve(lines []string, isPartTwo bool) (count int) {
 	grid := NewStringGrid(lines)
 	freq := map[string][]image.Point{}
 
@@ -32,28 +32,38 @@ func PartOne(lines []string) {
 		}
 	}
 
-	isEmpty := func(p image.Point) bool {
-		return grid.At(p) != "" && grid.At(p) != "#"
-	}
-
-	count := 0
-	for _, coords := range freq {
-		for pair := range Combi2(coords) {
-			a, b := pair[0], pair[1]
-			if anti := a.Add(a.Sub(b)); isEmpty(anti) {
-				grid.Set(anti, "#")
-				count++
-			}
-			if anti := b.Add(b.Sub(a)); isEmpty(anti) {
-				grid.Set(anti, "#")
-				count++
-			}
+	check := func(anti image.Point) {
+		if grid.At(anti) != "#" {
+			grid.Set(anti, "#")
+			count++
 		}
 	}
 
-	// fmt.Println(grid)
+	var createAnti func(point, diff image.Point)
+	createAnti = func(point, diff image.Point) {
+		anti := point.Add(diff)
+		if !grid.IsInside(anti) {
+			return
+		}
+		check(anti)
+		if isPartTwo {
+			createAnti(anti, diff)
+		}
+	}
 
-	fmt.Println("Part  1:", count)
+	for _, coords := range freq {
+		for pair := range Combi2(coords) {
+			a, b := pair[0], pair[1]
+			if isPartTwo {
+				check(a)
+				check(b)
+			}
+			createAnti(a, a.Sub(b))
+			createAnti(b, b.Sub(a))
+		}
+	}
+
+	return count
 }
 
 func main() {
@@ -77,5 +87,6 @@ func main() {
 		lines = utils.ReadLines(inputFile)
 	}
 
-	PartOne(lines)
+	fmt.Println("PartOne: ", Solve(lines, false))
+	fmt.Println("PartTwo: ", Solve(lines, true))
 }
