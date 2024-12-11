@@ -57,6 +57,41 @@ func PartOne(lines []string) int {
 	return count
 }
 
+func PartTwo(lines []string) int {
+	heights := NewGrid[int](len(lines[0]), len(lines))
+	for i, row := range lines {
+		for j, col := range row {
+			heights.Values[image.Point{j, i}] = int(col) - '0'
+		}
+	}
+	grid := NewGrid[int](heights.Right+1, heights.Bottom+1)
+
+	for height := 9; height >= 1; height-- {
+		for point, h := range heights.PointsIter() {
+			if h != height {
+				continue
+			}
+			if h == 9 {
+				grid.Set(point, 1)
+			}
+			for _, d := range []image.Point{ToTop, ToRight, ToBottom, ToLeft} {
+				if p2 := point.Add(d); heights.At(p2) == heights.At(point)-1 {
+					grid.Set(p2, grid.At(point)+grid.At(p2))
+				}
+			}
+		}
+	}
+
+	count := 0
+	for p, v := range heights.PointsIter() {
+		if v == 0 {
+			count += grid.At(p)
+		}
+	}
+
+	return count
+}
+
 func main() {
 	lines := []string{
 		"89010123",
@@ -75,4 +110,5 @@ func main() {
 	}
 
 	fmt.Println("Part 1: ", PartOne(lines))
+	fmt.Println("Part 2: ", PartTwo(lines))
 }
