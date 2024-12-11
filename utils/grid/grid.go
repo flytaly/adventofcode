@@ -7,12 +7,11 @@ import (
 	"iter"
 	"strconv"
 	"strings"
-
-	"golang.org/x/exp/constraints"
 )
 
 type GridValue interface {
-	string | byte | constraints.Integer | constraints.Float
+	// string | byte | constraints.Integer | constraints.Float
+	any
 }
 
 type Grid[T GridValue] struct {
@@ -84,7 +83,7 @@ func CellToString(value interface{}) (string, error) {
 	case rune:
 		return string(v), nil
 	default:
-		return "", fmt.Errorf("unsupported type: %T", v)
+		return fmt.Sprintf("%v", v), nil
 	}
 }
 
@@ -94,7 +93,7 @@ func (g Grid[T]) String() string {
 	for p := range g.PointsIter() {
 		s, err := CellToString(g.Values[p])
 		if err != nil {
-			return "couldn't convert value to string"
+			return err.Error()
 		}
 		sb.WriteString(s)
 		end := ""
