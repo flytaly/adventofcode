@@ -41,17 +41,16 @@ var B = func(a, b, c Point) int {
 	return (c.X*a.Y - c.Y*a.X) / (b.X*a.Y - b.Y*a.X)
 }
 
-func PartOne(lines []string) (result int) {
+func Solve(lines []string, add int) (result int) {
 	machines := parse(lines)
-
 	for _, m := range machines {
-		b := B(m.A, m.B, m.Prize)
-		a := A(m.A, m.B, m.Prize)
-		if m.A.Mul(a).Add(m.B.Mul(b)).Eq(m.Prize) {
+		prize := m.Prize.Add(image.Pt(add, add))
+		b := B(m.A, m.B, prize)
+		a := A(m.A, m.B, prize)
+		if m.A.Mul(a).Add(m.B.Mul(b)).Eq(prize) {
 			result += a*3 + b
 		}
 	}
-
 	return result
 }
 
@@ -79,5 +78,6 @@ func main() {
 		lines = utils.ReadLines(inputFile)
 	}
 
-	fmt.Println("Part 1: ", PartOne(lines))
+	fmt.Println("Part 1: ", Solve(lines, 0))
+	fmt.Println("Part 2: ", Solve(lines, 10000000000000))
 }
