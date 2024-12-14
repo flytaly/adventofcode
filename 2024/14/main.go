@@ -21,13 +21,10 @@ func parse(lines []string) (robots []Robot) {
 	return robots
 }
 
-func mod(a, b int) int {
-	return (a%b + b) % b
-}
-
 func PartOne(lines []string, time, cols, rows int) int {
 	robots := parse(lines)
 
+	rect := image.Rect(0, 0, cols, rows)
 	q := image.Rect(0, 0, cols/2, rows/2)
 	quads := []image.Rectangle{
 		q,
@@ -37,9 +34,7 @@ func PartOne(lines []string, time, cols, rows int) int {
 	}
 	count := make([]int, len(quads))
 	for _, robo := range robots {
-		robo.p = robo.p.Add(robo.v.Mul(time))
-		robo.p.X = mod(robo.p.X, cols)
-		robo.p.Y = mod(robo.p.Y, rows)
+		robo.p = robo.p.Add(robo.v.Mul(time)).Mod(rect)
 		for i, quad := range quads {
 			if robo.p.In(quad) {
 				count[i]++
@@ -52,6 +47,41 @@ func PartOne(lines []string, time, cols, rows int) int {
 		prod *= c
 	}
 	return prod
+}
+
+func draw(robots []Robot, cols, rows int) {
+	grid := map[image.Point]bool{}
+	for _, r := range robots {
+		grid[r.p] = true
+	}
+	for i := 0; i < cols; i++ {
+		for j := 0; j < rows; j++ {
+			c := "."
+			if grid[image.Pt(i, j)] {
+				c = "#"
+			}
+			fmt.Print(c)
+		}
+		fmt.Println()
+	}
+}
+
+func PartTwo(lines []string) int {
+	robots := parse(lines)
+	cols, rows := 101, 103
+	rect := image.Rect(0, 0, cols, rows)
+
+	for time := 1; ; time++ {
+		unique := make(map[image.Point]struct{})
+		for i, robo := range robots {
+			robots[i].p = robo.p.Add(robo.v).Mod(rect)
+			unique[robots[i].p] = struct{}{}
+		}
+		if len(unique) == len(robots) {
+			draw(robots, cols, rows)
+			return time
+		}
+	}
 }
 
 func main() {
@@ -77,4 +107,5 @@ func main() {
 
 	// fmt.Println("Part 1: ", PartOne(lines, 100, 11, 7))
 	fmt.Println("Part 1: ", PartOne(lines, 100, 101, 103))
+	fmt.Println("Part 2: ", PartTwo(lines))
 }
