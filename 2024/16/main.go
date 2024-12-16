@@ -6,8 +6,10 @@ import (
 	"cmp"
 	"fmt"
 	"image"
+	"math"
 	"os"
 	"slices"
+	"time"
 )
 
 func parse(lines []string) (grid Grid[string], start image.Point, end image.Point) {
@@ -29,6 +31,7 @@ type FrontTile struct {
 	p    image.Point
 	dir  image.Point
 	cost int
+	path []image.Point
 }
 
 func (t FrontTile) calcCost(dir image.Point) int {
@@ -36,7 +39,6 @@ func (t FrontTile) calcCost(dir image.Point) int {
 		return t.cost + 1
 	}
 	return t.cost + 1001
-
 }
 
 type Node struct {
@@ -44,12 +46,14 @@ type Node struct {
 	dir image.Point
 }
 
-func PartOne(lines []string) (result int) {
+func Solve(lines []string) (int, int) {
 	grid, start, end := parse(lines)
 
-	frontier := []FrontTile{{p: start, cost: 0, dir: ToRight}}
-
+	frontier := []FrontTile{{p: start, cost: 0, dir: ToRight, path: []image.Point{start}}}
 	costs := map[Node]int{}
+	paths := [][]image.Point{}
+
+	finalCost := math.MaxInt
 
 outer:
 	for len(frontier) > 0 {
@@ -61,22 +65,34 @@ outer:
 		for _, dir := range []image.Point{ToTop, ToRight, ToBottom, ToLeft} {
 			nextP := current.p.Add(dir)
 			newCost := current.calcCost(dir)
-			if nextP == end {
-				result = newCost
-				break outer
+			if nextP == end && finalCost >= newCost {
+				finalCost = newCost
+				paths = append(paths, append(current.path, end))
+				continue outer
 			}
 			if grid.At(nextP) == "#" {
 				continue
 			}
 			t := Node{p: nextP, dir: dir}
-			if cost, ok := costs[t]; !ok || cost > newCost {
+			if cost, ok := costs[t]; !ok || cost >= newCost {
 				costs[t] = newCost
-				frontier = append(frontier, FrontTile{p: nextP, cost: newCost, dir: dir})
+
+				path := append(slices.Clone(current.path), nextP)
+				fr := FrontTile{p: nextP, cost: newCost, dir: dir, path: path}
+				frontier = append(frontier, fr)
 			}
 		}
 	}
 
-	return result
+	unique := make(map[image.Point]struct{})
+	for _, path := range paths {
+		for _, p := range path {
+			grid.Set(p, "O")
+			unique[p] = struct{}{}
+		}
+	}
+
+	return finalCost, len(unique)
 }
 
 func main() {
@@ -105,5 +121,9 @@ func main() {
 		lines = utils.ReadLines(inputFile)
 	}
 
-	fmt.Println("Part 1: ", PartOne(lines))
+	ts := time.Now()
+	p1, p2 := Solve(lines)
+	fmt.Println("Part 1: ", p1)
+	fmt.Println("Part 2: ", p2)
+	fmt.Println("Time: ", time.Since(ts))
 }
