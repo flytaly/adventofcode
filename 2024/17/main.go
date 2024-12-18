@@ -24,7 +24,7 @@ func parse(lines []string) ([]int, Registers) {
 	return prog, r
 }
 
-func execute(prog []int, rr Registers) (string, Registers) {
+func execute(prog []int, rr Registers) string {
 	output := []string{}
 	for pointer := 0; pointer < len(prog); {
 		literal := prog[pointer+1]
@@ -53,22 +53,37 @@ func execute(prog []int, rr Registers) (string, Registers) {
 		pointer += 2
 	}
 
-	return strings.Join(output, ","), rr
+	return strings.Join(output, ",")
 }
 
 func PartOne(lines []string) string {
 	program, registers := parse(lines)
-	res, _ := execute(program, registers)
+	res := execute(program, registers)
 	return res
+}
+
+func PartTwo(lines []string) int {
+	program, rr := parse(lines)
+	expected := strings.Split(lines[4], " ")[1]
+
+	rr.A = 0
+	for i := len(expected) - 1; i >= 0; i -= 2 {
+		rr.A <<= 3
+		for execute(program, rr) != expected[i:] {
+			rr.A++
+		}
+	}
+
+	return rr.A
 }
 
 func main() {
 	lines := []string{
-		"Register A: 729",
+		"Register A: 2024",
 		"Register B: 0",
 		"Register C: 0",
 		"",
-		"Program: 0,1,5,4,3,0",
+		"Program: 0,3,5,4,3,0",
 	}
 
 	if len(os.Args) > 1 {
@@ -77,4 +92,5 @@ func main() {
 	}
 
 	fmt.Println("Part 1:", PartOne(lines))
+	fmt.Println("Part 2:", PartTwo(lines))
 }
