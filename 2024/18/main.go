@@ -45,6 +45,25 @@ func PartOne(input []string, size int, steps int) int {
 	return findPath(grid)
 }
 
+func PartTwo(input []string, size int, steps int) string {
+	grid := NewGrid[string](size, size)
+	grid.Fill(".")
+	for _, bytes := range input[:steps] {
+		sp := utils.ToInts(strings.Split(bytes, ","))
+		grid.Set(image.Pt(sp[0], sp[1]), "#")
+	}
+
+	for _, bytes := range input[steps+1:] {
+		sp := utils.ToInts(strings.Split(bytes, ","))
+		grid.Set(image.Pt(sp[0], sp[1]), "#")
+		if findPath(grid) == -1 {
+			return fmt.Sprintf("%d,%d", sp[0], sp[1])
+		}
+	}
+
+	return ""
+}
+
 func main() {
 	lines := []string{
 		"5,4",
@@ -78,8 +97,10 @@ func main() {
 		inputFile := os.Args[1]
 		lines = utils.ReadLines(inputFile)
 		fmt.Println("Part 1:", PartOne(lines, 71, 1024))
+		fmt.Println("Part 2:", PartTwo(lines, 71, 1024))
 	} else {
 		fmt.Println("Part 1:", PartOne(lines, 7, 12))
+		fmt.Println("Part 2:", PartTwo(lines, 7, 12))
 	}
 
 }
