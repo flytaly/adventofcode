@@ -66,6 +66,14 @@ func (g *Grid[t]) Span(p Point, dir image.Point, length int) []t {
 	return res
 }
 
+func (g *Grid[T]) Fill(value T) {
+	for c := g.Left; c <= g.Right; c++ {
+		for r := g.Top; r <= g.Bottom; r++ {
+			g.Set(Point{c, r}, value)
+		}
+	}
+}
+
 func (g Grid[T]) IsInside(p Point) bool {
 	return p.X >= g.Left && p.X <= g.Right && p.Y >= g.Top && p.Y <= g.Bottom
 }
