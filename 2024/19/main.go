@@ -2,31 +2,29 @@ package main
 
 import (
 	"aoc/utils"
-	"cmp"
 	"fmt"
 	"os"
-	"slices"
 	"strings"
 )
 
-func check(str string, prefixes map[byte][]string, memo map[string]bool) bool {
+func check(str string, prefixes map[byte][]string, memo map[string]int) int {
 	if res, ok := memo[str]; ok {
 		return res
 	}
 	for _, prefix := range prefixes[str[0]] {
 		if after, ok := strings.CutPrefix(str, prefix); ok {
-			if after == "" || check(after, prefixes, memo) {
-				memo[str] = true
-				return true
+			if after == "" {
+				memo[str]++
+				continue
 			}
+			memo[str] += check(after, prefixes, memo)
 		}
 	}
 
-	memo[str] = false
-	return false
+	return memo[str]
 }
 
-func PartOne(input []string) int {
+func Solve(input []string) (valid int, sum int) {
 	patterns := strings.Split(input[0], ", ")
 	designs := append([]string{}, input[2:]...)
 
@@ -35,21 +33,15 @@ func PartOne(input []string) int {
 		prefixes[p[0]] = append(prefixes[p[0]], p)
 	}
 
-	for _, pat := range prefixes {
-		slices.SortFunc(pat, func(a, b string) int {
-			return cmp.Compare(len(b), len(a))
-		})
-	}
-
-	count := 0
-	memo := map[string]bool{}
+	memo := map[string]int{}
 	for _, d := range designs {
-		if check(d, prefixes, memo) {
-			count++
+		if res := check(d, prefixes, memo); res > 0 {
+			valid++
+			sum += res
 		}
 	}
 
-	return count
+	return valid, sum
 }
 
 func main() {
@@ -71,5 +63,7 @@ func main() {
 		lines = utils.ReadLines(inputFile)
 	}
 
-	fmt.Println("Part 1", PartOne(lines))
+	p1, p2 := Solve(lines)
+	fmt.Println("Part 1", p1)
+	fmt.Println("Part 2", p2)
 }
