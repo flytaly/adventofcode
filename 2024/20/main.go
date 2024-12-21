@@ -67,6 +67,22 @@ func PartOne(input []string, minSave int) (count int) {
 	return count
 }
 
+func PartTwo(input []string, minSave int) (count int) {
+	grid, start, end := parse(input)
+	dist := getDistMap(grid, start, end)
+
+	for p1, d1 := range dist {
+		for p2, d2 := range dist {
+			manhattan := utils.Abs(p1.X-p2.X) + utils.Abs(p1.Y-p2.Y)
+			if manhattan <= 20 && d2-d1-manhattan >= minSave {
+				count++
+			}
+		}
+	}
+
+	return count
+}
+
 func main() {
 	lines := []string{
 		"###############",
@@ -90,7 +106,9 @@ func main() {
 		inputFile := os.Args[1]
 		lines = utils.ReadLines(inputFile)
 		fmt.Println("Part 1:", PartOne(lines, 100))
+		fmt.Println("Part 2:", PartTwo(lines, 100))
 	} else {
 		fmt.Println("Part 1:", PartOne(lines, 20))
+		fmt.Println("Part 2:", PartTwo(lines, 50))
 	}
 }
