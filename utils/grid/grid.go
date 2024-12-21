@@ -66,6 +66,21 @@ func (g *Grid[t]) Span(p Point, dir image.Point, length int) []t {
 	return res
 }
 
+// Neighbs returns a neighbor iterator.
+// If no directions are given, it returns only direct neighbors
+func (grid Grid[T]) Neighbs(p Point, dirs ...Point) iter.Seq2[Point, T] {
+	if len(dirs) == 0 {
+		dirs = []Point{ToTop, ToRight, ToBottom, ToLeft}
+	}
+	return func(yield func(Point, T) bool) {
+		for _, d := range dirs {
+			if neighb := p.Add(d); !yield(neighb, grid.At(neighb)) {
+				return
+			}
+		}
+	}
+}
+
 func (g *Grid[T]) Fill(value T) {
 	for c := g.Left; c <= g.Right; c++ {
 		for r := g.Top; r <= g.Bottom; r++ {
