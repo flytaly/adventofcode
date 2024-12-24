@@ -23,32 +23,36 @@ func PartOne(lines []string) (sum int) {
 	return sum
 }
 
-func PartTwo(lines []string) (sum int) {
+func PartTwo(lines []string) (maximum int) {
 	const steps int = 2000
-	sequences := map[[4]int]int{}
+	var sequences = map[[4]int]int{}
 
-	for _, n := range utils.ToInts(lines) {
+	// It is faster to save all the data even though it is not needed.
+	// Probably, it happens because of garbage collector.
+	var seen = make([]map[[4]int]struct{}, len(lines))
+
+	for i, n := range utils.ToInts(lines) {
 		diffs := make([]int, steps)
-		seen := map[[4]int]struct{}{}
+		seen[i] = make(map[[4]int]struct{}, steps)
 		prev := n
-		for i := 0; i < steps; i++ {
+		for step := 0; step < steps; step++ {
 			n = (n ^ n*64) % MOD
 			n = (n ^ n/32) % MOD
 			n = (n ^ n*2048) % MOD
 			price := n % 10
-			diffs[i] = price - prev
+			diffs[step] = price - prev
 			prev = price
-			if i < 3 {
+			if step < 3 {
 				continue
 			}
-			seq := [4]int(diffs[i-3 : i+1])
-			if _, ok := seen[seq]; !ok {
-				seen[seq] = struct{}{}
+			seq := [4]int(diffs[step-3 : step+1])
+			if _, ok := seen[i][seq]; !ok {
+				seen[i][seq] = struct{}{}
 				sequences[seq] += price
 			}
 		}
 	}
-	maximum := 0
+
 	for _, v := range sequences {
 		if v > maximum {
 			maximum = v
